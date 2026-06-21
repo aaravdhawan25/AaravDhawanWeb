@@ -361,7 +361,7 @@ export default function FirstJourneyDetailPage() {
                 Competition Results
               </span>
               <h2 className="text-[clamp(1.6rem,3.5vw,2.4rem)] font-bold tracking-tight text-zinc-900 dark:text-zinc-50 mt-2">
-                Awards &amp; placements.
+                Awards &amp; Placements.
               </h2>
             </motion.div>
 
