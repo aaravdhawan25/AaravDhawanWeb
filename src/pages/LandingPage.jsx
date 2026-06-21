@@ -1,7 +1,8 @@
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { motion, useMotionValue, useSpring } from 'framer-motion'
+import { motion, useMotionValue, useSpring, useInView, animate } from 'framer-motion'
 import { ArrowRight, Mail } from 'lucide-react'
+import ConstellationField from '../components/ConstellationField'
 
 const GithubIcon = ({ size = 16 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -15,13 +16,97 @@ const LinkedinIcon = ({ size = 16 }) => (
   </svg>
 )
 
+/* ---------- motion helpers ---------- */
+
+const container = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
+}
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } },
+}
+const wordsContainer = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.07 } },
+}
+const wordReveal = {
+  hidden: { opacity: 0, y: 28, filter: 'blur(10px)' },
+  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.75, ease: [0.16, 1, 0.3, 1] } },
+}
+
+const HEADLINE = [
+  { text: 'Engineering' },
+  { text: 'the' },
+  { text: 'intersection', gradient: true },
+  { text: 'of' },
+  { text: 'atoms' },
+  { text: 'and' },
+  { text: 'bits.' },
+]
+
+/* ---------- magnetic wrapper ---------- */
+
+function Magnetic({ children, strength = 0.35, className = '' }) {
+  const ref = useRef(null)
+  const x = useMotionValue(0)
+  const y = useMotionValue(0)
+  const sx = useSpring(x, { stiffness: 220, damping: 16, mass: 0.4 })
+  const sy = useSpring(y, { stiffness: 220, damping: 16, mass: 0.4 })
+
+  return (
+    <motion.div
+      ref={ref}
+      className={className}
+      style={{ x: sx, y: sy, display: 'inline-flex' }}
+      onMouseMove={e => {
+        const r = ref.current.getBoundingClientRect()
+        x.set((e.clientX - (r.left + r.width / 2)) * strength)
+        y.set((e.clientY - (r.top + r.height / 2)) * strength)
+      }}
+      onMouseLeave={() => { x.set(0); y.set(0) }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+/* ---------- count-up stat ---------- */
+
+function CountUp({ value, duration = 1.6 }) {
+  const ref = useRef(null)
+  const inView = useInView(ref, { once: true, margin: '-10%' })
+  const match = String(value).match(/^([\d.]+)(.*)$/)
+  const target = match ? parseFloat(match[1]) : 0
+  const suffix = match ? match[2] : String(value)
+  const [val, setVal] = useState(0)
+
+  useEffect(() => {
+    if (!inView) return
+    const controls = animate(0, target, {
+      duration,
+      ease: [0.16, 1, 0.3, 1],
+      onUpdate: v => setVal(v),
+    })
+    return () => controls.stop()
+  }, [inView, target, duration])
+
+  return (
+    <span ref={ref}>
+      {Math.round(val)}{suffix}
+    </span>
+  )
+}
+
+/* ---------- portal cards ---------- */
+
 const portalCards = [
   {
     href: '/projects',
     label: 'Projects',
     description: 'AI vision systems, custom keyboards, and more engineering builds.',
     accent: '#30d158',
-    bg: 'from-emerald-950/40 to-zinc-950',
+    bgClass: 'dark:from-emerald-950/40 dark:to-zinc-950',
     tags: ['AI Vision', 'PCB Design', 'Robotics'],
     icon: (
       <svg viewBox="0 0 80 80" className="w-full h-full" fill="none">
@@ -37,9 +122,9 @@ const portalCards = [
   {
     href: '/first-journey',
     label: 'FIRST Journey',
-    description: '2 seasons of competitive robotics — designing, machining, and competing.',
+    description: '4 seasons of competitive robotics — designing, machining, and competing.',
     accent: '#0071e3',
-    bg: 'from-blue-950/40 to-zinc-950',
+    bgClass: 'dark:from-blue-950/40 dark:to-zinc-950',
     tags: ['FTC', 'CNC Machining', 'Java Auton'],
     icon: (
       <svg viewBox="0 0 80 80" className="w-full h-full" fill="none">
@@ -54,52 +139,70 @@ const portalCards = [
   },
 ]
 
-const stagger = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.09, delayChildren: 0.1 } },
-}
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.65, ease: [0.16, 1, 0.3, 1] } },
-}
-
 function PortalCard({ card, index }) {
-  const mx = useMotionValue(0)
-  const my = useMotionValue(0)
-  const gx = useSpring(mx, { stiffness: 120, damping: 18 })
-  const gy = useSpring(my, { stiffness: 120, damping: 18 })
+  const ref = useRef(null)
+  const mx = useMotionValue(-400)
+  const my = useMotionValue(-400)
+  const gx = useSpring(mx, { stiffness: 130, damping: 18 })
+  const gy = useSpring(my, { stiffness: 130, damping: 18 })
+  const rxV = useMotionValue(0)
+  const ryV = useMotionValue(0)
+  const rx = useSpring(rxV, { stiffness: 150, damping: 16 })
+  const ry = useSpring(ryV, { stiffness: 150, damping: 16 })
+
+  function handleMove(e) {
+    const r = ref.current.getBoundingClientRect()
+    const px = e.clientX - r.left
+    const py = e.clientY - r.top
+    mx.set(px)
+    my.set(py)
+    rxV.set(-((py / r.height) - 0.5) * 9)
+    ryV.set(((px / r.width) - 0.5) * 9)
+  }
+  function handleLeave() {
+    mx.set(-400)
+    my.set(-400)
+    rxV.set(0)
+    ryV.set(0)
+  }
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 32 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7, delay: 0.5 + index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+      initial={{ opacity: 0, y: 36 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.7, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+      style={{ perspective: 1000 }}
     >
-      <Link to={card.href} className="block group">
-        <div
-          className={`relative overflow-hidden rounded-3xl border border-zinc-800/60 bg-gradient-to-br ${card.bg} p-8 h-72 flex flex-col justify-between transition-all duration-300 hover:border-zinc-700/80 hover:shadow-2xl`}
-          onMouseMove={e => {
-            const r = e.currentTarget.getBoundingClientRect()
-            mx.set(e.clientX - r.left)
-            my.set(e.clientY - r.top)
-          }}
-          onMouseLeave={() => { mx.set(-400); my.set(-400) }}
+      <Link to={card.href} className="block group" onClick={() => window.scrollTo({ top: 0, behavior: 'instant' })}>
+        <motion.div
+          ref={ref}
+          onMouseMove={handleMove}
+          onMouseLeave={handleLeave}
+          style={{ rotateX: rx, rotateY: ry, transformStyle: 'preserve-3d' }}
+          className={`relative overflow-hidden rounded-3xl border border-zinc-200/80 dark:border-zinc-800/60 bg-white/70 dark:bg-gradient-to-br ${card.bgClass} p-8 h-72 flex flex-col justify-between transition-colors duration-300 hover:border-zinc-300 dark:hover:border-zinc-700 backdrop-blur-sm`}
         >
+          {/* cursor spotlight */}
           <motion.div
-            className="absolute w-48 h-48 rounded-full pointer-events-none -translate-x-1/2 -translate-y-1/2"
+            className="absolute w-56 h-56 rounded-full pointer-events-none -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
             style={{
               x: gx, y: gy,
-              background: `radial-gradient(circle, ${card.accent}14 0%, transparent 70%)`,
+              background: `radial-gradient(circle, ${card.accent}22 0%, transparent 70%)`,
             }}
           />
+          {/* top accent line */}
+          <div
+            className="absolute top-0 left-0 right-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            style={{ background: `linear-gradient(90deg, transparent, ${card.accent}, transparent)` }}
+          />
 
-          <div className="relative z-10">
-            <div className="w-16 h-16 mb-5 opacity-80">{card.icon}</div>
-            <h3 className="text-2xl font-bold text-white mb-2">{card.label}</h3>
-            <p className="text-sm text-zinc-400 leading-relaxed">{card.description}</p>
+          <div className="relative z-10" style={{ transform: 'translateZ(40px)' }}>
+            <div className="w-16 h-16 mb-5 opacity-90 transition-transform duration-300 group-hover:scale-105">{card.icon}</div>
+            <h3 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2">{card.label}</h3>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-sm">{card.description}</p>
           </div>
 
-          <div className="relative z-10 flex items-center justify-between">
+          <div className="relative z-10 flex items-center justify-between" style={{ transform: 'translateZ(25px)' }}>
             <div className="flex gap-2 flex-wrap">
               {card.tags.map(t => (
                 <span key={t} className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full"
@@ -108,29 +211,36 @@ function PortalCard({ card, index }) {
                 </span>
               ))}
             </div>
-            <div className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 group-hover:scale-110"
+            <div className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 group-hover:scale-110"
               style={{ background: `${card.accent}20`, color: card.accent }}>
-              <ArrowRight size={14} />
+              <ArrowRight size={15} className="transition-transform duration-200 group-hover:translate-x-0.5" />
             </div>
           </div>
-        </div>
+        </motion.div>
       </Link>
     </motion.div>
   )
 }
 
 const stats = [
-  { value: '2', label: 'FTC Seasons' },
+  { value: '4', label: 'FTC + FLL Seasons' },
   { value: '4+', label: 'Projects built' },
   { value: '2', label: 'PCBs designed' },
   { value: '94%', label: 'Vision accuracy' },
 ]
 
+const socials = [
+  { icon: GithubIcon, href: 'https://github.com/aaravdhawan25', label: 'GitHub' },
+  { icon: LinkedinIcon, href: 'https://www.linkedin.com/in/aarav-dhawan-0564693a4', label: 'LinkedIn' },
+  { icon: Mail, href: 'mailto:aaravdhawan25@gmail.com', label: 'Email' },
+]
+
 export default function LandingPage() {
-  const mouseX = useMotionValue(0)
-  const mouseY = useMotionValue(0)
-  const orb1X = useSpring(useMotionValue(0), { stiffness: 60, damping: 20 })
-  const orb1Y = useSpring(useMotionValue(0), { stiffness: 60, damping: 20 })
+  // cursor spotlight
+  const spotX = useMotionValue(-600)
+  const spotY = useMotionValue(-600)
+  const sSpotX = useSpring(spotX, { stiffness: 120, damping: 24, mass: 0.5 })
+  const sSpotY = useSpring(spotY, { stiffness: 120, damping: 24, mass: 0.5 })
 
   return (
     <>
@@ -138,46 +248,69 @@ export default function LandingPage() {
       <section
         className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
         onMouseMove={e => {
-          mouseX.set(e.clientX / window.innerWidth)
-          mouseY.set(e.clientY / window.innerHeight)
+          const r = e.currentTarget.getBoundingClientRect()
+          spotX.set(e.clientX - r.left)
+          spotY.set(e.clientY - r.top)
         }}
+        onMouseLeave={() => { spotX.set(-600); spotY.set(-600) }}
       >
-        <div className="absolute inset-0 pointer-events-none"
+        {/* faint grid */}
+        <div className="absolute inset-0 pointer-events-none opacity-60"
           style={{
-            backgroundImage: 'linear-gradient(rgba(128,128,128,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(128,128,128,0.04) 1px, transparent 1px)',
-            backgroundSize: '60px 60px',
+            backgroundImage: 'linear-gradient(rgba(128,128,128,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(128,128,128,0.035) 1px, transparent 1px)',
+            backgroundSize: '64px 64px',
+            maskImage: 'radial-gradient(ellipse 80% 70% at 50% 45%, black 40%, transparent 100%)',
+            WebkitMaskImage: 'radial-gradient(ellipse 80% 70% at 50% 45%, black 40%, transparent 100%)',
           }}
         />
 
-        <motion.div className="absolute top-[-15%] left-[5%] w-[55vw] h-[55vw] max-w-[640px] max-h-[640px] rounded-full bg-[#0071e3]/[0.07] dark:bg-[#0071e3]/[0.05] blur-[120px] pointer-events-none"
+        {/* interactive constellation */}
+        <ConstellationField />
+
+        {/* ambient blur orbs */}
+        <motion.div className="absolute top-[-15%] left-[5%] w-[55vw] h-[55vw] max-w-[640px] max-h-[640px] rounded-full bg-[#0071e3]/[0.08] dark:bg-[#0071e3]/[0.06] blur-[120px] pointer-events-none"
           animate={{ x: [0, 18, 0], y: [0, -14, 0] }}
           transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
         />
-        <motion.div className="absolute bottom-[-5%] right-[0%] w-[40vw] h-[40vw] max-w-[500px] max-h-[500px] rounded-full bg-[#30d158]/[0.06] blur-[90px] pointer-events-none"
+        <motion.div className="absolute bottom-[-5%] right-[0%] w-[40vw] h-[40vw] max-w-[500px] max-h-[500px] rounded-full bg-[#7b61ff]/[0.07] dark:bg-[#7b61ff]/[0.06] blur-[100px] pointer-events-none"
           animate={{ x: [0, -16, 0], y: [0, 12, 0] }}
           transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
         />
 
+        {/* cursor spotlight */}
         <motion.div
-          variants={stagger}
+          className="absolute w-[620px] h-[620px] rounded-full pointer-events-none -translate-x-1/2 -translate-y-1/2 hidden md:block"
+          style={{
+            x: sSpotX, y: sSpotY,
+            background: 'radial-gradient(circle, rgba(0,113,227,0.11) 0%, transparent 62%)',
+          }}
+        />
+
+        <motion.div
+          variants={container}
           initial="hidden"
           animate="show"
           className="relative z-10 flex flex-col items-center text-center px-6 max-w-5xl mx-auto"
         >
           <motion.div variants={fadeUp}>
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[12px] font-medium tracking-wide uppercase border border-[#0071e3]/30 bg-[#0071e3]/10 text-[#0071e3] mb-8">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#0071e3] animate-pulse" />
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[12px] font-medium tracking-wide uppercase border border-[#0071e3]/30 bg-[#0071e3]/10 text-[#0071e3] mb-8 backdrop-blur-sm">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-[#0071e3] opacity-75 animate-ping" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#0071e3]" />
+              </span>
               Open to collaboration &amp; internships
             </span>
           </motion.div>
 
           <motion.h1
-            variants={fadeUp}
+            variants={wordsContainer}
             className="text-[clamp(2.6rem,8vw,5.8rem)] font-bold tracking-tight leading-[1.04] text-zinc-900 dark:text-zinc-50 mb-6 text-balance"
           >
-            Engineering the{' '}
-            <span className="gradient-text">intersection</span>
-            {' '}of atoms and bits.
+            {HEADLINE.map((w, i) => (
+              <motion.span key={i} variants={wordReveal} className="inline-block mr-[0.22em] last:mr-0">
+                {w.gradient ? <span className="gradient-text">{w.text}</span> : w.text}
+              </motion.span>
+            ))}
           </motion.h1>
 
           <motion.p variants={fadeUp}
@@ -186,44 +319,67 @@ export default function LandingPage() {
             I'm <strong className="text-zinc-700 dark:text-zinc-200 font-semibold">Aarav Dhawan</strong> — a high school freshman building competition robots, training vision models, designing PCBs, and pushing what's possible with hardware and AI.
           </motion.p>
 
-          <motion.div variants={fadeUp} className="flex flex-wrap items-center justify-center gap-3 mb-12">
-            <Link
-              to="/projects"
-              className="h-11 px-7 rounded-full bg-[#0071e3] text-white text-[15px] font-semibold hover:bg-[#0077ed] transition-colors duration-150 flex items-center gap-2"
-            >
-              View projects <ArrowRight size={15} />
-            </Link>
-            <Link
-              to="/first-journey"
-              className="h-11 px-7 rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-200 text-[15px] font-semibold hover:border-zinc-400 dark:hover:border-zinc-500 transition-colors duration-150 flex items-center"
-            >
-              FIRST Journey
-            </Link>
+          <motion.div variants={fadeUp} className="flex flex-wrap items-center justify-center gap-3 mb-14">
+            <Magnetic>
+              <Link
+                to="/projects"
+                onClick={() => window.scrollTo({ top: 0, behavior: 'instant' })}
+                className="group relative h-11 px-7 rounded-full bg-[#0071e3] text-white text-[15px] font-semibold hover:bg-[#0077ed] transition-colors duration-150 flex items-center gap-2 overflow-hidden shadow-lg shadow-[#0071e3]/25"
+              >
+                <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+                <span className="relative">View projects</span>
+                <ArrowRight size={15} className="relative transition-transform duration-200 group-hover:translate-x-0.5" />
+              </Link>
+            </Magnetic>
+            <Magnetic>
+              <Link
+                to="/first-journey"
+                onClick={() => window.scrollTo({ top: 0, behavior: 'instant' })}
+                className="h-11 px-7 rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-200 text-[15px] font-semibold hover:border-zinc-400 dark:hover:border-zinc-500 hover:bg-zinc-100/50 dark:hover:bg-white/5 transition-colors duration-150 flex items-center backdrop-blur-sm"
+              >
+                FIRST Journey
+              </Link>
+            </Magnetic>
           </motion.div>
 
-          <motion.div variants={fadeUp} className="flex flex-wrap items-center justify-center gap-10 mb-10">
+          <motion.div variants={fadeUp} className="grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-x-10 gap-y-6 mb-10">
             {stats.map(s => (
               <div key={s.label} className="flex flex-col items-center">
-                <span className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 tracking-tight">{s.value}</span>
-                <span className="text-[11px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mt-0.5">{s.label}</span>
+                <span className="text-2xl sm:text-[1.7rem] font-bold text-zinc-900 dark:text-zinc-50 tracking-tight tabular-nums">
+                  <CountUp value={s.value} />
+                </span>
+                <span className="text-[11px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mt-1">{s.label}</span>
               </div>
             ))}
           </motion.div>
 
           <motion.div variants={fadeUp} className="flex items-center gap-4">
-            {[
-              { icon: GithubIcon, href: 'https://github.com/aaravdhawan25', label: 'GitHub' },
-              { icon: LinkedinIcon, href: 'https://www.linkedin.com/in/aarav-dhawan-0564693a4', label: 'LinkedIn' },
-              { icon: Mail, href: 'mailto:aaravdhawan25@gmail.com', label: 'Email' },
-            ].map(({ icon: Icon, href, label }) => (
+            {socials.map(({ icon: Icon, href, label }) => (
               <motion.a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label}
                 whileHover={{ scale: 1.12, y: -2 }} whileTap={{ scale: 0.92 }}
-                className="w-9 h-9 flex items-center justify-center rounded-full border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors duration-150"
+                className="w-9 h-9 flex items-center justify-center rounded-full border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors duration-150 backdrop-blur-sm"
               >
                 <Icon size={16} />
               </motion.a>
             ))}
           </motion.div>
+        </motion.div>
+
+        {/* scroll indicator */}
+        <motion.div
+          className="absolute bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.6, duration: 0.8 }}
+        >
+          <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-600">Scroll</span>
+          <div className="w-5 h-8 rounded-full border border-zinc-300 dark:border-zinc-700 flex justify-center pt-1.5">
+            <motion.div
+              className="w-1 h-1.5 rounded-full bg-zinc-400 dark:bg-zinc-500"
+              animate={{ y: [0, 8, 0], opacity: [1, 0.3, 1] }}
+              transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+            />
+          </div>
         </motion.div>
       </section>
 
@@ -250,7 +406,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
     </>
   )
 }

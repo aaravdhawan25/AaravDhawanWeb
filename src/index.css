@@ -51,6 +51,17 @@
     text-wrap: balance;
   }
 
+  /* Developer dot-grid background */
+  .page-bg {
+    background-image: radial-gradient(circle at center, rgba(14, 50, 150, 0.055) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  html.dark .page-bg {
+    background-image: radial-gradient(circle at center, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
   .bg-glass-dark {
     background: rgba(9, 9, 11, 0.7);
     backdrop-filter: blur(20px) saturate(180%);

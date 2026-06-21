@@ -1,8 +1,10 @@
 import { useState, useRef } from 'react'
+import { Link } from 'react-router-dom'
+import { useDarkMode } from '../hooks/useDarkMode'
 import { motion, AnimatePresence } from 'framer-motion'
 import { firstJourneyItems, ftcProject, decodeAwards } from '../data/firstJourney'
 import RobotParallax from '../components/visuals/RobotParallax'
-import { Award, Cpu, Wrench, Zap, X, ChevronRight, Trophy, Star, MapPin } from 'lucide-react'
+import { Award, Cpu, Wrench, Zap, X, ChevronRight, Trophy, Star, MapPin, ArrowRight } from 'lucide-react'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -33,10 +35,28 @@ const ROLE_DETAILS = {
       },
     ],
   },
+  'Programmer & Researcher': {
+    summary: "Split time between hands-on robot work and driving the team's Innovation Project research.",
+    sections: [
+      {
+        heading: 'Programming & Mechanical Associate',
+        body: 'Wrote and tested robot control code for the FLL robot game missions. Also contributed to mechanical assembly, troubleshooting mechanisms, and tuning the robot ahead of each competition.',
+      },
+      {
+        heading: 'Innovation Project Researcher',
+        body: 'Led research into real-world problems for each season — methanol as alternative fuel (SUPERPOWERED), sustainable shoe sole design (MASTERPIECE), and banana blossom as a fish alternative (SUBMERGED). Developed the project narrative, prepared research materials, and presented findings to judges.',
+      },
+      {
+        heading: 'Competition results',
+        body: 'Across three FLL seasons, contributed to a 1st Place Innovation Project win, a patent filing, advancement to the Global Innovation Challenge, and a 1st Place at the American Robotics Open Competition (AROC).',
+      },
+    ],
+  },
 }
 
-function RolePopup({ role, color, onClose }) {
+function RolePopup({ role, color, team, season, onClose }) {
   const details = ROLE_DETAILS[role]
+  const dark = useDarkMode()
   if (!details) return null
 
   return (
@@ -62,9 +82,13 @@ function RolePopup({ role, color, onClose }) {
           transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
           className="relative w-full max-w-lg rounded-3xl overflow-hidden"
           style={{
-            background: 'linear-gradient(145deg, #131620 0%, #0d1018 100%)',
+            background: dark
+              ? 'linear-gradient(145deg, #131620 0%, #0d1018 100%)'
+              : 'linear-gradient(145deg, #ffffff 0%, #f4f7fb 100%)',
             border: `1px solid ${color}28`,
-            boxShadow: `0 32px 64px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06), 0 0 80px ${color}14`,
+            boxShadow: dark
+              ? `0 32px 64px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06), 0 0 80px ${color}14`
+              : `0 24px 48px rgba(0,0,0,0.12), 0 0 0 1px ${color}20, 0 0 60px ${color}10`,
           }}
         >
           {/* Top accent bar */}
@@ -78,17 +102,14 @@ function RolePopup({ role, color, onClose }) {
                   style={{ color }}>
                   Role
                 </span>
-                <h2 className="text-2xl font-bold text-white tracking-tight mt-1">{role}</h2>
-                <p className="text-sm text-zinc-400 mt-1.5 leading-relaxed">{details.summary}</p>
+                <h2 className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight mt-1">{role}</h2>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1.5 leading-relaxed">{details.summary}</p>
               </div>
               <button
                 onClick={onClose}
-                className="flex-shrink-0 ml-4 mt-0.5 p-1.5 rounded-full transition-colors"
-                style={{ background: 'rgba(255,255,255,0.06)' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.12)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
+                className="flex-shrink-0 ml-4 mt-0.5 p-1.5 rounded-full transition-colors text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/10"
               >
-                <X size={15} className="text-zinc-400" />
+                <X size={15} />
               </button>
             </div>
 
@@ -101,16 +122,16 @@ function RolePopup({ role, color, onClose }) {
                     <ChevronRight size={10} style={{ color }} />
                   </div>
                   <div>
-                    <p className="text-[13px] font-semibold text-zinc-200 mb-1">{s.heading}</p>
-                    <p className="text-sm text-zinc-400 leading-relaxed">{s.body}</p>
+                    <p className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-200 mb-1">{s.heading}</p>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">{s.body}</p>
                   </div>
                 </div>
               ))}
             </div>
 
             {/* Footer */}
-            <div className="mt-7 pt-5 border-t border-zinc-800/60 flex items-center gap-2">
-              <span className="text-[11px] text-zinc-600 font-mono">Team 23490 · Beta Blink · FTC 2025–26</span>
+            <div className="mt-7 pt-5 border-t border-zinc-200 dark:border-zinc-800/60 flex items-center gap-2">
+              <span className="text-[11px] text-zinc-500 dark:text-zinc-600 font-mono">{team} · {season}</span>
             </div>
           </div>
         </motion.div>
@@ -123,6 +144,7 @@ function AwardCard({ award, color, index }) {
   const ref = useRef(null)
   const [tilt, setTilt] = useState({ x: 0, y: 0 })
   const [hovered, setHovered] = useState(false)
+  const dark = useDarkMode()
 
   function onMove(e) {
     const rect = ref.current.getBoundingClientRect()
@@ -142,18 +164,23 @@ function AwardCard({ award, color, index }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => { setHovered(false); setTilt({ x: 0, y: 0 }) }}
       style={{
-        perspective: '600px',
         transform: hovered
           ? `perspective(600px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale(1.03)`
           : 'perspective(600px) rotateX(0deg) rotateY(0deg) scale(1)',
-        transition: 'transform 0.18s ease, box-shadow 0.18s ease',
+        transition: 'transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease',
         boxShadow: hovered
-          ? `0 0 0 1px ${color}55, 0 8px 32px ${color}22, 0 2px 8px rgba(0,0,0,0.4)`
-          : `0 0 0 1px ${color}22, 0 2px 8px rgba(0,0,0,0.2)`,
+          ? `0 0 0 1.5px ${color}66, 0 8px 32px ${color}28, 0 0 0 4px ${color}12`
+          : dark
+            ? `0 0 0 1px ${color}28, 0 2px 8px rgba(0,0,0,0.3)`
+            : `0 0 0 1px ${color}30, 0 2px 12px rgba(0,0,0,0.08)`,
         borderRadius: '16px',
         background: hovered
-          ? `linear-gradient(135deg, ${color}0f 0%, rgba(13,17,28,0.95) 100%)`
-          : 'rgba(13,17,28,0.7)',
+          ? dark
+            ? `linear-gradient(135deg, ${color}14 0%, rgba(13,17,28,0.95) 100%)`
+            : `linear-gradient(135deg, ${color}12 0%, rgba(255,255,255,0.97) 100%)`
+          : dark
+            ? 'rgba(13,17,28,0.7)'
+            : 'rgba(255,255,255,0.85)',
         padding: '20px',
         cursor: 'default',
         transformStyle: 'preserve-3d',
@@ -184,7 +211,7 @@ function AwardCard({ award, color, index }) {
 
       {/* Award title */}
       <p className="text-sm font-semibold leading-snug"
-        style={{ color: hovered ? '#f0f4ff' : '#c8d0e0' }}>
+        style={{ color: hovered ? (dark ? '#f0f4ff' : '#111827') : (dark ? '#c8d0e0' : '#374151') }}>
         {award.title}
       </p>
     </motion.div>
@@ -256,10 +283,37 @@ function AwardsSection() {
   )
 }
 
-function StatBadge({ stat }) {
+function StatBadge({ stat, color = '#0071e3' }) {
+  const ref = useRef(null)
+  const [tilt, setTilt] = useState({ x: 0, y: 0 })
+  const [hovered, setHovered] = useState(false)
+
+  function onMove(e) {
+    const r = ref.current.getBoundingClientRect()
+    setTilt({
+      x: -((e.clientY - r.top - r.height / 2) / (r.height / 2)) * 7,
+      y: ((e.clientX - r.left - r.width / 2) / (r.width / 2)) * 7,
+    })
+  }
+
   return (
-    <div className="flex flex-col items-center px-5 py-4 rounded-2xl border border-zinc-800/60 bg-zinc-900/40">
-      <span className="text-xl font-bold text-white tracking-tight">{stat.value}</span>
+    <div
+      ref={ref}
+      onMouseMove={onMove}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => { setHovered(false); setTilt({ x: 0, y: 0 }) }}
+      className="flex flex-col items-center px-5 py-4 rounded-2xl bg-white/80 dark:bg-zinc-900/50 border border-zinc-200/80 dark:border-zinc-800/60 cursor-default"
+      style={{
+        transform: hovered
+          ? `perspective(400px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale(1.06)`
+          : 'perspective(400px) scale(1)',
+        transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+        boxShadow: hovered
+          ? `0 0 0 1.5px ${color}70, 0 8px 28px ${color}28, 0 0 0 4px ${color}10`
+          : undefined,
+      }}
+    >
+      <span className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">{stat.value}</span>
       <span className="text-[11px] text-zinc-500 uppercase tracking-widest mt-0.5">{stat.label}</span>
     </div>
   )
@@ -299,10 +353,25 @@ function SeasonCard({ item }) {
             </motion.button>
           </motion.div>
 
-          <motion.h2 variants={fadeUp}
-            className="text-[clamp(1.6rem,3.5vw,2.4rem)] font-bold tracking-tight text-zinc-900 dark:text-zinc-50 mb-1">
-            {item.season}
-          </motion.h2>
+          <div className="flex items-start justify-between flex-wrap gap-4 mb-1">
+            <motion.h2 variants={fadeUp}
+              className="text-[clamp(1.6rem,3.5vw,2.4rem)] font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+              {item.season}
+            </motion.h2>
+            <motion.div variants={fadeUp}>
+              <Link
+                to={`/first-journey/${item.slug}`}
+                onClick={() => window.scrollTo({ top: 0, behavior: 'instant' })}
+                className="inline-flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-widest px-3.5 py-1.5 rounded-full transition-all"
+                style={{ color: item.color, background: `${item.color}14`, border: `1px solid ${item.color}35` }}
+                onMouseEnter={e => { e.currentTarget.style.background = `${item.color}22`; e.currentTarget.style.borderColor = `${item.color}60` }}
+                onMouseLeave={e => { e.currentTarget.style.background = `${item.color}14`; e.currentTarget.style.borderColor = `${item.color}35` }}
+              >
+                View season
+                <ArrowRight size={11} />
+              </Link>
+            </motion.div>
+          </div>
           <motion.p variants={fadeUp} className="text-base text-zinc-500 dark:text-zinc-400 mb-8">
             {item.team}
           </motion.p>
@@ -327,7 +396,7 @@ function SeasonCard({ item }) {
             <motion.div variants={stagger}>
               <div className="grid grid-cols-2 gap-3">
                 {item.stats.map((s, i) => (
-                  <motion.div key={i} variants={fadeUp}><StatBadge stat={s} /></motion.div>
+                  <motion.div key={i} variants={fadeUp}><StatBadge stat={s} color={item.color} /></motion.div>
                 ))}
               </div>
             </motion.div>
@@ -336,7 +405,7 @@ function SeasonCard({ item }) {
       </motion.section>
 
       {popupOpen && (
-        <RolePopup role={item.role} color={item.color} onClose={() => setPopupOpen(false)} />
+        <RolePopup role={item.role} color={item.color} team={item.team} season={item.season} onClose={() => setPopupOpen(false)} />
       )}
     </>
   )
@@ -359,11 +428,11 @@ export default function FirstJourneyPage() {
               </motion.div>
               <motion.h1 variants={fadeUp}
                 className="text-[clamp(2rem,5vw,3.6rem)] font-bold tracking-tight leading-tight text-zinc-900 dark:text-zinc-50 mb-4">
-                One season.<br />One obsession.
+                4 seasons.<br />One obsession.
               </motion.h1>
               <motion.p variants={fadeUp}
                 className="text-base lg:text-lg text-zinc-500 dark:text-zinc-400 leading-relaxed mb-6 max-w-md">
-                FIRST Tech Challenge is where I learned to design for manufacture, work under real competitive pressure, and build systems that had to perform flawlessly — in front of judges.
+                From FLL Innovation Projects to FTC robot builds — three years of competing, designing, and building systems that had to perform under real competitive pressure.
               </motion.p>
               <motion.div variants={fadeUp} className="flex flex-wrap gap-3">
                 {ftcProject.tags.map(tag => (

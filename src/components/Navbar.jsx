@@ -12,12 +12,12 @@ const NAV_ITEMS = [
   {
     label: 'Projects',
     href: '/projects',
-    children: projects.map(p => ({ label: p.title + ' · ' + p.subtitle, href: '/projects', color: p.color })),
+    children: projects.map(p => ({ label: p.title + ' · ' + p.subtitle, href: `/projects/${p.id}`, color: p.color })),
   },
   {
     label: 'FIRST Journey',
     href: '/first-journey',
-    children: firstJourneyItems.map(i => ({ label: i.season, href: '/first-journey', color: i.color })),
+    children: firstJourneyItems.map(i => ({ label: i.season, href: `/first-journey/${i.slug}`, color: i.color })),
   },
   { label: 'Skills', href: '/skills' },
 ]
