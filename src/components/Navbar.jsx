@@ -213,25 +213,16 @@ function MobileNavGroup({ item, onClose, dark }) {
   const location = useLocation()
   const active = location.pathname === item.href
 
-  const handleMainTap = () => {
-    if (item.children) {
-      setExpanded(v => !v)
-    } else {
-      scrollTop()
-      onClose()
-    }
-  }
-
   return (
     <div>
-      <div
-        className="flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer select-none transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
-        onClick={handleMainTap}
-      >
-        <span className={`text-[15px] font-medium ${active ? 'text-zinc-900 dark:text-zinc-50' : 'text-zinc-600 dark:text-zinc-300'}`}>
-          {item.label}
-        </span>
-        {item.children && (
+      {item.children ? (
+        <div
+          className="flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer select-none transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
+          onClick={() => setExpanded(v => !v)}
+        >
+          <span className={`text-[15px] font-medium ${active ? 'text-zinc-900 dark:text-zinc-50' : 'text-zinc-600 dark:text-zinc-300'}`}>
+            {item.label}
+          </span>
           <motion.svg
             width="12" height="12" viewBox="0 0 12 12" fill="none"
             animate={{ rotate: expanded ? 180 : 0 }}
@@ -240,9 +231,18 @@ function MobileNavGroup({ item, onClose, dark }) {
           >
             <path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </motion.svg>
-        )}
-      </div>
-
+        </div>
+      ) : (
+        <Link
+          to={item.href}
+          onClick={() => { scrollTop(); onClose() }}
+          className="flex items-center justify-between px-4 py-3 rounded-xl transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
+        >
+          <span className={`text-[15px] font-medium ${active ? 'text-zinc-900 dark:text-zinc-50' : 'text-zinc-600 dark:text-zinc-300'}`}>
+            {item.label}
+          </span>
+        </Link>
+      )}
       {item.children && (
         <AnimatePresence initial={false}>
           {expanded && (
