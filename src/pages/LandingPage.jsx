@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useMotionValue, useSpring, useInView, animate } from 'framer-motion'
 import { ArrowRight, Mail } from 'lucide-react'
-import ConstellationField from '../components/ConstellationField'
+import ReactiveGrid from '../components/ReactiveGrid'
 
 const GithubIcon = ({ size = 16 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -236,54 +236,21 @@ const socials = [
 ]
 
 export default function LandingPage() {
-  // cursor spotlight
-  const spotX = useMotionValue(-600)
-  const spotY = useMotionValue(-600)
-  const sSpotX = useSpring(spotX, { stiffness: 120, damping: 24, mass: 0.5 })
-  const sSpotY = useSpring(spotY, { stiffness: 120, damping: 24, mass: 0.5 })
-
   return (
     <>
       {/* Hero */}
-      <section
-        className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
-        onMouseMove={e => {
-          const r = e.currentTarget.getBoundingClientRect()
-          spotX.set(e.clientX - r.left)
-          spotY.set(e.clientY - r.top)
-        }}
-        onMouseLeave={() => { spotX.set(-600); spotY.set(-600) }}
-      >
-        {/* faint grid */}
-        <div className="absolute inset-0 pointer-events-none opacity-60"
-          style={{
-            backgroundImage: 'linear-gradient(rgba(128,128,128,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(128,128,128,0.035) 1px, transparent 1px)',
-            backgroundSize: '64px 64px',
-            maskImage: 'radial-gradient(ellipse 80% 70% at 50% 45%, black 40%, transparent 100%)',
-            WebkitMaskImage: 'radial-gradient(ellipse 80% 70% at 50% 45%, black 40%, transparent 100%)',
-          }}
-        />
-
-        {/* interactive constellation */}
-        <ConstellationField />
+      <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
+        {/* reactive magnetic dot-grid */}
+        <ReactiveGrid />
 
         {/* ambient blur orbs */}
-        <motion.div className="absolute top-[-15%] left-[5%] w-[55vw] h-[55vw] max-w-[640px] max-h-[640px] rounded-full bg-[#0071e3]/[0.08] dark:bg-[#0071e3]/[0.06] blur-[120px] pointer-events-none"
+        <motion.div className="absolute top-[-15%] left-[5%] w-[55vw] h-[55vw] max-w-[640px] max-h-[640px] rounded-full bg-[#0071e3]/[0.09] dark:bg-[#0071e3]/[0.07] blur-[120px] pointer-events-none"
           animate={{ x: [0, 18, 0], y: [0, -14, 0] }}
           transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
         />
-        <motion.div className="absolute bottom-[-5%] right-[0%] w-[40vw] h-[40vw] max-w-[500px] max-h-[500px] rounded-full bg-[#7b61ff]/[0.07] dark:bg-[#7b61ff]/[0.06] blur-[100px] pointer-events-none"
+        <motion.div className="absolute bottom-[-5%] right-[0%] w-[40vw] h-[40vw] max-w-[500px] max-h-[500px] rounded-full bg-[#7b61ff]/[0.08] dark:bg-[#7b61ff]/[0.07] blur-[100px] pointer-events-none"
           animate={{ x: [0, -16, 0], y: [0, 12, 0] }}
           transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
-        />
-
-        {/* cursor spotlight */}
-        <motion.div
-          className="absolute w-[620px] h-[620px] rounded-full pointer-events-none -translate-x-1/2 -translate-y-1/2 hidden md:block"
-          style={{
-            x: sSpotX, y: sSpotY,
-            background: 'radial-gradient(circle, rgba(0,113,227,0.11) 0%, transparent 62%)',
-          }}
         />
 
         <motion.div
