@@ -26,7 +26,7 @@ const row2 = [...skills.slice(8), ...skills.slice(8)]
 const proficiencies = [
   { area: 'Mechanical Design', level: 88, color: '#0071e3' },
   { area: 'Embedded Systems', level: 76, color: '#30d158' },
-  { area: 'Computer Vision / AI', level: 72, color: '#7b61ff' },
+  { area: 'Computer Vision / AI', level: 92, color: '#7b61ff' },
   { area: 'PCB Design', level: 65, color: '#ffd60a' },
   { area: 'Web Development', level: 70, color: '#61dafb' },
 ]
