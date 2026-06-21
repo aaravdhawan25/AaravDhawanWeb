@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { firstJourneyItems, ftcProject } from '../data/firstJourney'
+import { firstJourneyItems, ftcProject, decodeAwards } from '../data/firstJourney'
 import RobotParallax from '../components/visuals/RobotParallax'
-import { Award, Cpu, Wrench, Zap, X, ChevronRight } from 'lucide-react'
+import { Award, Cpu, Wrench, Zap, X, ChevronRight, Trophy, Star, MapPin } from 'lucide-react'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -116,6 +116,143 @@ function RolePopup({ role, color, onClose }) {
         </motion.div>
       </motion.div>
     </AnimatePresence>
+  )
+}
+
+function AwardCard({ award, color, index }) {
+  const ref = useRef(null)
+  const [tilt, setTilt] = useState({ x: 0, y: 0 })
+  const [hovered, setHovered] = useState(false)
+
+  function onMove(e) {
+    const rect = ref.current.getBoundingClientRect()
+    const dx = (e.clientX - rect.left - rect.width  / 2) / (rect.width  / 2)
+    const dy = (e.clientY - rect.top  - rect.height / 2) / (rect.height / 2)
+    setTilt({ x: -dy * 8, y: dx * 8 })
+  }
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={{ duration: 0.5, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
+      onMouseMove={onMove}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => { setHovered(false); setTilt({ x: 0, y: 0 }) }}
+      style={{
+        perspective: '600px',
+        transform: hovered
+          ? `perspective(600px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale(1.03)`
+          : 'perspective(600px) rotateX(0deg) rotateY(0deg) scale(1)',
+        transition: 'transform 0.18s ease, box-shadow 0.18s ease',
+        boxShadow: hovered
+          ? `0 0 0 1px ${color}55, 0 8px 32px ${color}22, 0 2px 8px rgba(0,0,0,0.4)`
+          : `0 0 0 1px ${color}22, 0 2px 8px rgba(0,0,0,0.2)`,
+        borderRadius: '16px',
+        background: hovered
+          ? `linear-gradient(135deg, ${color}0f 0%, rgba(13,17,28,0.95) 100%)`
+          : 'rgba(13,17,28,0.7)',
+        padding: '20px',
+        cursor: 'default',
+        transformStyle: 'preserve-3d',
+      }}
+    >
+      {/* Top row: trophy + highlight badge */}
+      <div className="flex items-start justify-between mb-4">
+        <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+          style={{ background: `${color}16`, border: `1px solid ${color}30` }}>
+          <Trophy size={16} style={{ color }} />
+        </div>
+        {award.highlight && (
+          <motion.div
+            animate={{ opacity: hovered ? 1 : 0.75 }}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest"
+            style={{
+              background: `${color}18`,
+              border: `1px solid ${color}40`,
+              color,
+              boxShadow: hovered ? `0 0 12px ${color}30` : 'none',
+            }}
+          >
+            <Star size={8} fill="currentColor" />
+            Highlight
+          </motion.div>
+        )}
+      </div>
+
+      {/* Award title */}
+      <p className="text-sm font-semibold leading-snug"
+        style={{ color: hovered ? '#f0f4ff' : '#c8d0e0' }}>
+        {award.title}
+      </p>
+    </motion.div>
+  )
+}
+
+function AwardsSection() {
+  const color = '#0071e3'
+  return (
+    <section className="py-16 border-t border-zinc-200 dark:border-zinc-800">
+      <div className="max-w-6xl mx-auto px-6 lg:px-10">
+        {/* Section header */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="mb-12"
+        >
+          <span className="text-[12px] uppercase tracking-[0.15em] font-semibold"
+            style={{ color }}>
+            Competition Results
+          </span>
+          <h2 className="text-[clamp(1.6rem,3.5vw,2.4rem)] font-bold tracking-tight text-zinc-900 dark:text-zinc-50 mt-2">
+            Awards &amp; placements.
+          </h2>
+        </motion.div>
+
+        {/* Events */}
+        <div className="space-y-14">
+          {decodeAwards.map((event, ei) => (
+            <div key={ei}>
+              {/* Event meta */}
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.45, delay: ei * 0.05 }}
+                className="mb-6"
+              >
+                <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-500 mb-2">
+                  <span>{event.date}</span>
+                  <span className="opacity-40">·</span>
+                  <MapPin size={10} />
+                  <span>{event.location}</span>
+                </div>
+                <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-100 tracking-tight">
+                  {event.event}
+                </h3>
+                <div className="mt-2 h-px w-full bg-zinc-100 dark:bg-zinc-800/60" />
+              </motion.div>
+
+              {/* Award cards grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {event.awards.map((award, ai) => (
+                  <AwardCard
+                    key={ai}
+                    award={award}
+                    color={color}
+                    index={ai + ei * 3}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   )
 }
 
@@ -256,6 +393,9 @@ export default function FirstJourneyPage() {
           <SeasonCard key={item.season} item={item} />
         ))}
       </div>
+
+      {/* Awards */}
+      <AwardsSection />
     </div>
   )
 }

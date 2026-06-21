@@ -19,6 +19,29 @@ export const firstJourneyItems = [
   },
 ]
 
+export const decodeAwards = [
+  {
+    event: 'Upper South Conference Southern League Tournament',
+    date: 'February 8, 2026',
+    location: 'Hightstown, NJ',
+    awards: [
+      { title: 'Finalist Alliance — 1st Team Selected', highlight: true },
+      { title: 'Advancement to NJ Championship', highlight: true },
+      { title: 'Think Award — 2nd Place', highlight: false },
+    ],
+  },
+  {
+    event: 'Upper Central and Northern Post Season Scrimmage',
+    date: 'May 23, 2026',
+    location: 'Somerset, NJ',
+    awards: [
+      { title: '1st Place Tele-Op Performance', highlight: true },
+      { title: '2nd Place Autonomous Performance', highlight: false },
+      { title: '#1 Ranked Team — Overall Decode Performance', highlight: true },
+    ],
+  },
+]
+
 export const ftcProject = {
   id: 'ftc-beta-blink',
   title: 'FTC Team 23490',
