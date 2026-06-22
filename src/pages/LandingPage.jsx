@@ -1,8 +1,8 @@
 import { useRef, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { motion, useMotionValue, useSpring, useInView, animate } from 'framer-motion'
+import { motion, useMotionValue, useSpring, useTransform, useInView, animate } from 'framer-motion'
 import { ArrowRight, Mail } from 'lucide-react'
-import ConstellationField from '../components/ConstellationField'
+import ReactiveGrid from '../components/ReactiveGrid'
 
 const GithubIcon = ({ size = 16 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -47,24 +47,54 @@ const HEADLINE = [
 
 /* ---------- magnetic wrapper ---------- */
 
-function Magnetic({ children, strength = 0.35, className = '' }) {
+function Magnetic({ children, strength = 0.4, bobDelay = 0, className = '' }) {
   const ref = useRef(null)
   const x = useMotionValue(0)
   const y = useMotionValue(0)
-  const sx = useSpring(x, { stiffness: 220, damping: 16, mass: 0.4 })
-  const sy = useSpring(y, { stiffness: 220, damping: 16, mass: 0.4 })
+  // smooth, weighty follow springs
+  const sx = useSpring(x, { stiffness: 150, damping: 15, mass: 0.6 })
+  const sy = useSpring(y, { stiffness: 150, damping: 15, mass: 0.6 })
+  const engaged = useRef(false)
+  const bobRef = useRef(null)
+
+  // gentle up/down bob on the raw Y until the first hover
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    bobRef.current = animate(y, [0, -11, 0], {
+      duration: 1.5,
+      repeat: Infinity,
+      ease: 'easeInOut',
+      delay: bobDelay,
+    })
+    return () => bobRef.current?.stop()
+  }, [y, bobDelay])
+
+  const stopBob = () => {
+    if (!engaged.current) {
+      engaged.current = true
+      bobRef.current?.stop()
+    }
+  }
 
   return (
     <motion.div
       ref={ref}
       className={className}
+      initial={false}
       style={{ x: sx, y: sy, display: 'inline-flex' }}
+      onMouseEnter={stopBob}
       onMouseMove={e => {
+        stopBob()
         const r = ref.current.getBoundingClientRect()
         x.set((e.clientX - (r.left + r.width / 2)) * strength)
         y.set((e.clientY - (r.top + r.height / 2)) * strength)
       }}
-      onMouseLeave={() => { x.set(0); y.set(0) }}
+      onMouseLeave={() => {
+        // hold the offset a beat, then ease back slowly for a weighty release
+        const release = { type: 'spring', stiffness: 55, damping: 13, mass: 1.1, delay: 0.14 }
+        animate(x, 0, release)
+        animate(y, 0, release)
+      }}
     >
       {children}
     </motion.div>
@@ -236,54 +266,21 @@ const socials = [
 ]
 
 export default function LandingPage() {
-  // cursor spotlight
-  const spotX = useMotionValue(-600)
-  const spotY = useMotionValue(-600)
-  const sSpotX = useSpring(spotX, { stiffness: 120, damping: 24, mass: 0.5 })
-  const sSpotY = useSpring(spotY, { stiffness: 120, damping: 24, mass: 0.5 })
-
   return (
     <>
       {/* Hero */}
-      <section
-        className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
-        onMouseMove={e => {
-          const r = e.currentTarget.getBoundingClientRect()
-          spotX.set(e.clientX - r.left)
-          spotY.set(e.clientY - r.top)
-        }}
-        onMouseLeave={() => { spotX.set(-600); spotY.set(-600) }}
-      >
-        {/* faint grid */}
-        <div className="absolute inset-0 pointer-events-none opacity-60"
-          style={{
-            backgroundImage: 'linear-gradient(rgba(128,128,128,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(128,128,128,0.035) 1px, transparent 1px)',
-            backgroundSize: '64px 64px',
-            maskImage: 'radial-gradient(ellipse 80% 70% at 50% 45%, black 40%, transparent 100%)',
-            WebkitMaskImage: 'radial-gradient(ellipse 80% 70% at 50% 45%, black 40%, transparent 100%)',
-          }}
-        />
-
-        {/* interactive constellation */}
-        <ConstellationField />
+      <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
+        {/* reactive magnetic dot-grid */}
+        <ReactiveGrid />
 
         {/* ambient blur orbs */}
-        <motion.div className="absolute top-[-15%] left-[5%] w-[55vw] h-[55vw] max-w-[640px] max-h-[640px] rounded-full bg-[#0071e3]/[0.08] dark:bg-[#0071e3]/[0.06] blur-[120px] pointer-events-none"
+        <motion.div className="absolute top-[-15%] left-[5%] w-[55vw] h-[55vw] max-w-[640px] max-h-[640px] rounded-full bg-[#0071e3]/[0.09] dark:bg-[#0071e3]/[0.07] blur-[120px] pointer-events-none"
           animate={{ x: [0, 18, 0], y: [0, -14, 0] }}
           transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
         />
-        <motion.div className="absolute bottom-[-5%] right-[0%] w-[40vw] h-[40vw] max-w-[500px] max-h-[500px] rounded-full bg-[#7b61ff]/[0.07] dark:bg-[#7b61ff]/[0.06] blur-[100px] pointer-events-none"
+        <motion.div className="absolute bottom-[-5%] right-[0%] w-[40vw] h-[40vw] max-w-[500px] max-h-[500px] rounded-full bg-[#7b61ff]/[0.08] dark:bg-[#7b61ff]/[0.07] blur-[100px] pointer-events-none"
           animate={{ x: [0, -16, 0], y: [0, 12, 0] }}
           transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
-        />
-
-        {/* cursor spotlight */}
-        <motion.div
-          className="absolute w-[620px] h-[620px] rounded-full pointer-events-none -translate-x-1/2 -translate-y-1/2 hidden md:block"
-          style={{
-            x: sSpotX, y: sSpotY,
-            background: 'radial-gradient(circle, rgba(0,113,227,0.11) 0%, transparent 62%)',
-          }}
         />
 
         <motion.div
@@ -308,7 +305,7 @@ export default function LandingPage() {
           >
             {HEADLINE.map((w, i) => (
               <motion.span key={i} variants={wordReveal} className="inline-block mr-[0.22em] last:mr-0">
-                {w.gradient ? <span className="gradient-text">{w.text}</span> : w.text}
+                {w.gradient ? <span className="gradient-text-animated">{w.text}</span> : w.text}
               </motion.span>
             ))}
           </motion.h1>
@@ -320,22 +317,22 @@ export default function LandingPage() {
           </motion.p>
 
           <motion.div variants={fadeUp} className="flex flex-wrap items-center justify-center gap-3 mb-14">
-            <Magnetic>
+            <Magnetic bobDelay={0}>
               <Link
                 to="/projects"
                 onClick={() => window.scrollTo({ top: 0, behavior: 'instant' })}
-                className="group relative h-11 px-7 rounded-full bg-[#0071e3] text-white text-[15px] font-semibold hover:bg-[#0077ed] transition-colors duration-150 flex items-center gap-2 overflow-hidden shadow-lg shadow-[#0071e3]/25"
+                className="group relative h-11 px-7 rounded-full bg-[#0071e3] text-white text-[15px] font-semibold hover:bg-[#0077ed] hover:shadow-[#0071e3]/40 active:scale-[0.96] transition-[transform,background-color,box-shadow] duration-200 flex items-center gap-2 overflow-hidden shadow-lg shadow-[#0071e3]/25 will-change-transform"
               >
                 <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
                 <span className="relative">View projects</span>
                 <ArrowRight size={15} className="relative transition-transform duration-200 group-hover:translate-x-0.5" />
               </Link>
             </Magnetic>
-            <Magnetic>
+            <Magnetic bobDelay={0.25}>
               <Link
                 to="/first-journey"
                 onClick={() => window.scrollTo({ top: 0, behavior: 'instant' })}
-                className="h-11 px-7 rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-200 text-[15px] font-semibold hover:border-zinc-400 dark:hover:border-zinc-500 hover:bg-zinc-100/50 dark:hover:bg-white/5 transition-colors duration-150 flex items-center backdrop-blur-sm"
+                className="h-11 px-7 rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-200 text-[15px] font-semibold hover:border-zinc-400 dark:hover:border-zinc-500 hover:bg-zinc-100/50 dark:hover:bg-white/5 active:scale-[0.96] transition-[transform,border-color,background-color] duration-200 flex items-center backdrop-blur-sm will-change-transform"
               >
                 FIRST Journey
               </Link>
