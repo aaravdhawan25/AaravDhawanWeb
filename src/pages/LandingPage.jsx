@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { motion, useMotionValue, useSpring, useInView, animate } from 'framer-motion'
+import { motion, useMotionValue, useSpring, useTransform, useInView, animate } from 'framer-motion'
 import { ArrowRight, Mail } from 'lucide-react'
 import ReactiveGrid from '../components/ReactiveGrid'
 
@@ -47,24 +47,54 @@ const HEADLINE = [
 
 /* ---------- magnetic wrapper ---------- */
 
-function Magnetic({ children, strength = 0.35, className = '' }) {
+function Magnetic({ children, strength = 0.4, bobDelay = 0, className = '' }) {
   const ref = useRef(null)
   const x = useMotionValue(0)
   const y = useMotionValue(0)
-  const sx = useSpring(x, { stiffness: 220, damping: 16, mass: 0.4 })
-  const sy = useSpring(y, { stiffness: 220, damping: 16, mass: 0.4 })
+  // smooth, weighty follow springs
+  const sx = useSpring(x, { stiffness: 150, damping: 15, mass: 0.6 })
+  const sy = useSpring(y, { stiffness: 150, damping: 15, mass: 0.6 })
+  const engaged = useRef(false)
+  const bobRef = useRef(null)
+
+  // gentle up/down bob on the raw Y until the first hover
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    bobRef.current = animate(y, [0, -11, 0], {
+      duration: 1.5,
+      repeat: Infinity,
+      ease: 'easeInOut',
+      delay: bobDelay,
+    })
+    return () => bobRef.current?.stop()
+  }, [y, bobDelay])
+
+  const stopBob = () => {
+    if (!engaged.current) {
+      engaged.current = true
+      bobRef.current?.stop()
+    }
+  }
 
   return (
     <motion.div
       ref={ref}
       className={className}
+      initial={false}
       style={{ x: sx, y: sy, display: 'inline-flex' }}
+      onMouseEnter={stopBob}
       onMouseMove={e => {
+        stopBob()
         const r = ref.current.getBoundingClientRect()
         x.set((e.clientX - (r.left + r.width / 2)) * strength)
         y.set((e.clientY - (r.top + r.height / 2)) * strength)
       }}
-      onMouseLeave={() => { x.set(0); y.set(0) }}
+      onMouseLeave={() => {
+        // hold the offset a beat, then ease back slowly for a weighty release
+        const release = { type: 'spring', stiffness: 55, damping: 13, mass: 1.1, delay: 0.14 }
+        animate(x, 0, release)
+        animate(y, 0, release)
+      }}
     >
       {children}
     </motion.div>
@@ -275,7 +305,7 @@ export default function LandingPage() {
           >
             {HEADLINE.map((w, i) => (
               <motion.span key={i} variants={wordReveal} className="inline-block mr-[0.22em] last:mr-0">
-                {w.gradient ? <span className="gradient-text">{w.text}</span> : w.text}
+                {w.gradient ? <span className="gradient-text-animated">{w.text}</span> : w.text}
               </motion.span>
             ))}
           </motion.h1>
@@ -287,22 +317,22 @@ export default function LandingPage() {
           </motion.p>
 
           <motion.div variants={fadeUp} className="flex flex-wrap items-center justify-center gap-3 mb-14">
-            <Magnetic>
+            <Magnetic bobDelay={0}>
               <Link
                 to="/projects"
                 onClick={() => window.scrollTo({ top: 0, behavior: 'instant' })}
-                className="group relative h-11 px-7 rounded-full bg-[#0071e3] text-white text-[15px] font-semibold hover:bg-[#0077ed] transition-colors duration-150 flex items-center gap-2 overflow-hidden shadow-lg shadow-[#0071e3]/25"
+                className="group relative h-11 px-7 rounded-full bg-[#0071e3] text-white text-[15px] font-semibold hover:bg-[#0077ed] hover:shadow-[#0071e3]/40 active:scale-[0.96] transition-[transform,background-color,box-shadow] duration-200 flex items-center gap-2 overflow-hidden shadow-lg shadow-[#0071e3]/25 will-change-transform"
               >
                 <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
                 <span className="relative">View projects</span>
                 <ArrowRight size={15} className="relative transition-transform duration-200 group-hover:translate-x-0.5" />
               </Link>
             </Magnetic>
-            <Magnetic>
+            <Magnetic bobDelay={0.25}>
               <Link
                 to="/first-journey"
                 onClick={() => window.scrollTo({ top: 0, behavior: 'instant' })}
-                className="h-11 px-7 rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-200 text-[15px] font-semibold hover:border-zinc-400 dark:hover:border-zinc-500 hover:bg-zinc-100/50 dark:hover:bg-white/5 transition-colors duration-150 flex items-center backdrop-blur-sm"
+                className="h-11 px-7 rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-200 text-[15px] font-semibold hover:border-zinc-400 dark:hover:border-zinc-500 hover:bg-zinc-100/50 dark:hover:bg-white/5 active:scale-[0.96] transition-[transform,border-color,background-color] duration-200 flex items-center backdrop-blur-sm will-change-transform"
               >
                 FIRST Journey
               </Link>

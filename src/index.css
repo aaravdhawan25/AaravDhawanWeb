@@ -81,6 +81,25 @@
     background-clip: text;
   }
 
+  /* Slowly shimmering brand gradient — used on the headline accent word */
+  .gradient-text-animated {
+    background: linear-gradient(120deg, #0071e3, #30a0ff, #7b61ff, #30a0ff, #0071e3);
+    background-size: 220% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradient-shimmer 7s ease-in-out infinite;
+  }
+
+  @keyframes gradient-shimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gradient-text-animated { animation: none; }
+  }
+
   .hero-grid {
     background-image:
       linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
