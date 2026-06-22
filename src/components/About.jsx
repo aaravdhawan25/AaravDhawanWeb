@@ -8,10 +8,10 @@ const fadeUp = {
 }
 
 const timeline = [
-  { year: '2023', title: 'First Robot Build', desc: 'Assembled my first VEX robot for a school showcase — sparked a full obsession with mechanical design.', icon: Wrench, color: '#0071e3' },
-  { year: '2024', title: 'FTC Team 23490 Founded', desc: 'Co-founded Beta Blink and took on the role of hardware lead — designing CNC-machined aluminum drivetrain components.', icon: Award, color: '#30d158' },
-  { year: '2024', title: 'First AI Vision Project', desc: 'Trained a YOLOv8 model via Roboflow and integrated it with a 4-DOF sorting arm, bridging ML and physical hardware.', icon: Brain, color: '#7b61ff' },
-  { year: '2025', title: 'PCB & Firmware Design', desc: 'Designed my first two-layer PCB in KiCad, hand-routed traces, assembled SMD components, and flashed QMK firmware.', icon: Cpu, color: '#ffd60a' },
+  { year: ' September 2022', title: 'First Robot Build', desc: 'Assembled my first Competition Lego robot for FLL - sparked a full obsession with mechanical design and programming.', icon: Wrench, color: '#0071e3' },
+  { year: 'May 2025', title: 'Rookie at FTC Team 23490', desc: 'Joined FTC Team 23490 as a rookie and exceeded expectations which got me Technical Lead Role as a rookie.  — designing custom CNC-machined aluminum and polycarbonate parts.', icon: Award, color: '#30d158' },
+  { year: 'January 2026', title: 'First AI Vision Project', desc: 'Trained a YOLOv8 model via Roboflow and integrated it with a 6-DOF sorting arm, bridging ML and physical hardware.', icon: Brain, color: '#7b61ff' },
+  { year: 'June 2026', title: 'PCB & Firmware Design', desc: 'Designed my first two-layer PCB in KiCad, hand-routed traces, assembled SMD components, and flashed QMK firmware.', icon: Cpu, color: '#ffd60a' },
 ]
 
 const pillars = [
