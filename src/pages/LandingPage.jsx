@@ -136,16 +136,16 @@ const portalCards = [
     label: 'Projects',
     description: 'AI vision systems, custom keyboards, and more engineering builds.',
     accent: '#30d158',
-    bgClass: 'dark:from-emerald-950/40 dark:to-zinc-950',
+    bgClass: 'from-emerald-50 to-white dark:from-emerald-950/60 dark:to-zinc-900',
     tags: ['AI Vision', 'PCB Design', 'Robotics'],
     icon: (
       <svg viewBox="0 0 80 80" className="w-full h-full" fill="none">
-        <rect x="8" y="28" width="64" height="44" rx="6" fill="rgba(48,209,88,0.08)" stroke="rgba(48,209,88,0.2)" strokeWidth="1.5" />
-        <rect x="18" y="36" width="20" height="18" rx="3" fill="rgba(48,209,88,0.15)" stroke="rgba(48,209,88,0.4)" strokeWidth="1" />
-        <rect x="44" y="36" width="20" height="18" rx="3" fill="rgba(48,209,88,0.1)" stroke="rgba(48,209,88,0.3)" strokeWidth="1" />
-        <line x1="8" y1="22" x2="72" y2="22" stroke="rgba(48,209,88,0.15)" strokeWidth="0.8" />
-        <circle cx="40" cy="16" r="4" fill="rgba(48,209,88,0.3)" stroke="rgba(48,209,88,0.5)" strokeWidth="1" />
-        <line x1="40" y1="20" x2="40" y2="28" stroke="rgba(48,209,88,0.3)" strokeWidth="0.8" />
+        <rect x="8" y="28" width="64" height="44" rx="6" fill="rgba(48,209,88,0.18)" stroke="rgba(48,209,88,0.55)" strokeWidth="1.5" />
+        <rect x="18" y="36" width="20" height="18" rx="3" fill="rgba(48,209,88,0.32)" stroke="rgba(48,209,88,0.7)" strokeWidth="1" />
+        <rect x="44" y="36" width="20" height="18" rx="3" fill="rgba(48,209,88,0.22)" stroke="rgba(48,209,88,0.6)" strokeWidth="1" />
+        <line x1="8" y1="22" x2="72" y2="22" stroke="rgba(48,209,88,0.4)" strokeWidth="1" />
+        <circle cx="40" cy="16" r="4" fill="rgba(48,209,88,0.55)" stroke="rgba(48,209,88,0.85)" strokeWidth="1.2" />
+        <line x1="40" y1="20" x2="40" y2="28" stroke="rgba(48,209,88,0.55)" strokeWidth="1.2" />
       </svg>
     ),
   },
@@ -154,16 +154,16 @@ const portalCards = [
     label: 'FIRST Journey',
     description: '4 seasons of competitive robotics — designing, machining, and competing.',
     accent: '#0071e3',
-    bgClass: 'dark:from-blue-950/40 dark:to-zinc-950',
+    bgClass: 'from-blue-50 to-white dark:from-blue-950/60 dark:to-zinc-900',
     tags: ['FTC', 'CNC Machining', 'Java Auton'],
     icon: (
       <svg viewBox="0 0 80 80" className="w-full h-full" fill="none">
-        <rect x="12" y="32" width="56" height="36" rx="5" fill="rgba(0,113,227,0.08)" stroke="rgba(0,113,227,0.2)" strokeWidth="1.5" />
-        <rect x="22" y="40" width="36" height="12" rx="2" fill="rgba(0,113,227,0.12)" stroke="rgba(0,113,227,0.35)" strokeWidth="1" />
-        <circle cx="29" cy="46" r="4" fill="rgba(0,113,227,0.3)" stroke="rgba(0,113,227,0.5)" strokeWidth="1" />
-        <circle cx="51" cy="46" r="4" fill="rgba(0,113,227,0.3)" stroke="rgba(0,113,227,0.5)" strokeWidth="1" />
-        <rect x="20" y="26" width="40" height="8" rx="3" fill="rgba(0,113,227,0.1)" stroke="rgba(0,113,227,0.25)" strokeWidth="1" />
-        <path d="M30 14 L40 8 L50 14 L50 26 L30 26 Z" fill="rgba(0,113,227,0.15)" stroke="rgba(0,113,227,0.35)" strokeWidth="1" />
+        <rect x="12" y="32" width="56" height="36" rx="5" fill="rgba(0,113,227,0.18)" stroke="rgba(0,113,227,0.55)" strokeWidth="1.5" />
+        <rect x="22" y="40" width="36" height="12" rx="2" fill="rgba(0,113,227,0.28)" stroke="rgba(0,113,227,0.65)" strokeWidth="1" />
+        <circle cx="29" cy="46" r="4" fill="rgba(0,113,227,0.55)" stroke="rgba(0,113,227,0.85)" strokeWidth="1.2" />
+        <circle cx="51" cy="46" r="4" fill="rgba(0,113,227,0.55)" stroke="rgba(0,113,227,0.85)" strokeWidth="1.2" />
+        <rect x="20" y="26" width="40" height="8" rx="3" fill="rgba(0,113,227,0.2)" stroke="rgba(0,113,227,0.5)" strokeWidth="1" />
+        <path d="M30 14 L40 8 L50 14 L50 26 L30 26 Z" fill="rgba(0,113,227,0.3)" stroke="rgba(0,113,227,0.65)" strokeWidth="1.2" />
       </svg>
     ),
   },
@@ -210,7 +210,7 @@ function PortalCard({ card, index }) {
           onMouseMove={handleMove}
           onMouseLeave={handleLeave}
           style={{ rotateX: rx, rotateY: ry, transformStyle: 'preserve-3d' }}
-          className={`relative overflow-hidden rounded-3xl border border-zinc-200/80 dark:border-zinc-800/60 bg-white/70 dark:bg-gradient-to-br ${card.bgClass} p-8 h-72 flex flex-col justify-between transition-colors duration-300 hover:border-zinc-300 dark:hover:border-zinc-700 backdrop-blur-sm`}
+          className={`relative overflow-hidden rounded-3xl border border-zinc-200 dark:border-zinc-700/60 bg-gradient-to-br ${card.bgClass} p-8 h-72 flex flex-col justify-between transition-colors duration-300 hover:border-zinc-300 dark:hover:border-zinc-600 shadow-sm dark:shadow-none backdrop-blur-sm`}
         >
           {/* cursor spotlight */}
           <motion.div
