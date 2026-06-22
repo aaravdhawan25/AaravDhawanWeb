@@ -202,8 +202,8 @@ export default function About() {
                   </div>
                 </div>
                 <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                  Received a formal recommendation letter recognizing my technical contributions,
-                  leadership in competitive robotics, and dedication to engineering.
+                  Received a formal recommendation letter recognizing my proactive problem-solving and reliability,
+                  in fast-paced environments as well as my dedication to maintaining high standards of accuracy.
                 </p>
                 <div className="mt-4 flex items-center gap-2">
                   <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full"
@@ -212,7 +212,8 @@ export default function About() {
                   </span>
                   <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full"
                     style={{ color: '#0071e3', background: '#0071e318', border: '1px solid #0071e330' }}>
-                    Engineering
+                    Dedication,
+                    Work Ethic
                   </span>
                 </div>
               </div>
