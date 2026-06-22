@@ -212,7 +212,10 @@ export default function About() {
                   </span>
                   <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full"
                     style={{ color: '#0071e3', background: '#0071e318', border: '1px solid #0071e330' }}>
-                    Dedication,
+                    Dedication
+                  </span>
+                  <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full"
+                    style={{ color: '#0071e3', background: '#0071e318', border: '1px solid #0071e330' }}>
                     Work Ethic
                   </span>
                 </div>
