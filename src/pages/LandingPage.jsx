@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion, useMotionValue, useSpring, useTransform, useInView, animate } from 'framer-motion'
 import { ArrowRight, Mail } from 'lucide-react'
 import ReactiveGrid from '../components/ReactiveGrid'
+import TopographicField from '../components/TopographicField'
 
 const GithubIcon = ({ size = 16 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -272,6 +273,9 @@ export default function LandingPage() {
       <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
         {/* reactive magnetic dot-grid */}
         <ReactiveGrid />
+
+        {/* reactive topographic contour waves (above the grid) */}
+        <TopographicField />
 
         {/* ambient blur orbs */}
         <motion.div className="absolute top-[-15%] left-[5%] w-[55vw] h-[55vw] max-w-[640px] max-h-[640px] rounded-full bg-[#0071e3]/[0.09] dark:bg-[#0071e3]/[0.07] blur-[120px] pointer-events-none"
